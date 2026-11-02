@@ -1,7 +1,7 @@
 # trade-data
 
 Données et code du projet claude.ai **TRADE** (backtests pour un challenge Topstep 50K).
-Le projet claude.ai contient les documents et le code complet ; ce dépôt contient les **données lourdes**, qui n'y tiennent pas.
+Ce dépôt contient le code, les calendriers et les données de marché.
 
 ## Données — `data/<SYM>/<SYM>_<année>.csv.zst`
 
@@ -19,13 +19,13 @@ Horodatage UTC (`ts_event` = ouverture de la minute). Seules les minutes avec au
 
 ## Charger
 ```bash
-python3 -I code/load_databento.py data/NQ nq_1m.pkl
+python3 -I load_databento.py data/NQ nq_1m.pkl
 ```
 
-## Calendriers — `config/`
+## Calendriers
 - `news_nq_2010_2020.csv` : FOMC programmés 2010-2020 (site de la Fed ; 14:15 en 2010-12, 12:30 les jours de conférence de presse 2011-12, 14:00 dès 2013).
 - Le calendrier 2021-2027 (CPI, NFP, FOMC) est dans le projet claude.ai : `trade/code/news_calendar.csv`.
 
-## Code — `code/`
+## Code
 - `engine.py` : moteur de backtest 1 minute (règles gelées de l'étude n°3 ; constantes MNQ).
 - `load_databento.py` : chargeur générique. `load_nq_databento.py`, `run_study_nq.py` : doc 08 (validation NQ 2010-2020).
