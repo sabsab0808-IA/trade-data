@@ -562,7 +562,7 @@ def main():
     for rows in payload.values():
         for r in rows:
             for i, x in enumerate(r):
-                if isinstance(x, str) and x[:1] in "+=":
+                if isinstance(x, str) and x and x[0] in "+=":
                     r[i] = "\u2009" + x
     (OUT / "sheet_payload.json").write_text(json.dumps(payload, ensure_ascii=False, default=str))
     print("\n".join(f"{a} : {b}" for a, b in D))
