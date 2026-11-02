@@ -7,7 +7,7 @@ date: 2026-11-02
 
 ## En une phrase
 
-**Après 9 études pré-enregistrées (~65 variantes, 4 marchés, 16 ans de données 1 minute), aucune stratégie intraday simple ne bat les coûts, et aucune stratégie swing multi-jours ne bat le buy & hold. On n'achète pas de challenge Topstep.**
+**Après 10 études pré-enregistrées (~66 variantes, 4 marchés, 16 ans de données 1 minute), aucune stratégie intraday simple ne bat les coûts, et aucune stratégie swing multi-jours ne bat le buy & hold. On n'achète pas de challenge Topstep.**
 
 ## Les études
 
@@ -23,6 +23,8 @@ date: 2026-11-02
 | 14 | Revue des stratégies publiées et des réplications 2024–26 | — | — | Les réplications indépendantes confirment nos résultats |
 | 15 / 15b | n°8 · Lundi acheteur intraday (t = 3,36 publié sur 2021–26) | NQ, ES, CL, GC 2010–26 | NQ 2010–20 : +0,02 R (t = 0,76) | Effet de période, écarté |
 | 17 / 17b | n°9 · Rebalancement de fin de mois SPY / IEF | 2002–2026 | Sharpe 0,64 jusqu'en 2023, −0,48 après | Disparu après publication |
+| 18 / 18b | n°10 · Suivi de tendance diversifié sur 29 ETF | 2008–2026 | Sharpe −0,02 après 2012 (60/40 : 0,99) | Non retenue |
+| 19 | Simulations historiques de l'agent (toutes les fenêtres 2010–2026) | NQ, ES, SPY/IEF | Challenge réussi 19,5 % contre 12 % au hasard | Sous le seuil (2 × hasard) |
 | 16 | Agent de trading papier (4 stratégies, comptes Topstep 50K et perso, Google Sheet) | depuis le 02/11/2026 | — | Suivi papier 2–3 semaines |
 
 Critère intraday (études 4 à 6) : ≥ +0,08 R par trade en IS et en OOS, IC positif, ≥ 3 marchés sur 4, et Monte Carlo Topstep ≥ 2 × le hasard. Critère swing (étude 7) : Sharpe IS ≥ 0,5, IC positif, Sharpe OOS ≥ 0,3, ≥ 3 marchés sur 4, et Sharpe supérieur au buy & hold en IS et en OOS.
@@ -36,10 +38,12 @@ Critère intraday (études 4 à 6) : ≥ +0,08 R par trade en IS et en OOS, IC p
 5. **La fréquence compte autant que l'espérance** : il faut ~+12 R en 1 à 2 mois pour un Topstep 50K.
 6. **En swing, les coûts ne sont plus un problème** (0,01 à 0,03 R par trade), mais l'overnight, le momentum 12 mois et le RSI 2 ne font pas mieux que d'acheter et attendre (Sharpe IS ≤ 0,49 contre 0,45 pour le buy & hold ; aucune ne passe les 5 critères). Seule piste exploratoire : RSI 2 achat seulement sur NQ + ES (Sharpe IS 0,29, OOS 1,04), trouvée a posteriori, donc à forward-tester uniquement.
 7. **Une règle trouvée sur 5 ans peut être un effet de période** : le lundi acheteur (t = 3,36 sur 2021–26) ne marche pas sur 2010–2020.
+8. **Le suivi de tendance ne bat pas un 60/40** sur 2012–2026, même sur 29 marchés (Sharpe −0,02 contre 0,99) : il protège des krachs, rien de plus.
+9. **Les simulations de l'agent (doc 19)** : 19,5 % de challenges réussis contre 12 % pour un trader sans edge ; sur 3 semaines, les résultats de l'agent et du hasard se recouvrent presque entièrement.
 
 ## Ressources disponibles
 
-- **Données** : dépôt GitHub privé `sabsab0808-IA/trade-data` (NQ, ES, CL, GC, 1 minute, 06/2010 → 10/2026, Databento, ~83 $ de crédits utilisés). Lecture avec le token GitHub de Saber (à redonner en début de session ; non stocké). Archive de secours : `trade-data.zip` chez Saber. Depuis le 02/11/2026 : dossier `data_ext/` (branche `ajout-donnees-publiques-2026-11`) avec 42 futures journaliers depuis 2000, 21 futures en 1 h, indices/ETF, VIX CBOE, COT CFTC, Fama-French, taux US, articles.
+- **Données** : dépôt GitHub privé `sabsab0808-IA/trade-data` (NQ, ES, CL, GC, 1 minute, 06/2010 → 10/2026, Databento, ~83 $ de crédits utilisés). Lecture avec le token GitHub de Saber (à redonner en début de session ; non stocké). Archive de secours : `trade-data.zip` chez Saber. Depuis le 02/11/2026 : collecte automatique chaque soir du 1 minute de 21 futures Topstep (`data_live/`, GitHub Actions, active après fusion de la branche dans `main`) ; dossier `data_ext/` (branche `ajout-donnees-publiques-2026-11`) avec 42 futures journaliers depuis 2000, 21 futures en 1 h, indices/ETF, VIX CBOE, COT CFTC, Fama-French, taux US, articles.
 - **Code** : `trade/code/` (moteurs `engine.py` et `study4.py`, études 1 à 6, `study7.py` pour le swing, Monte Carlo, chargeurs).
 - **Forward test automatique** (doc 07) et **agent de trading papier** (doc 16) : même tâche planifiée du mardi au samedi à 08:33 (Paris).
 - **Google Sheet « TRADE »** : https://docs.google.com/spreadsheets/d/1onXNuDqVmvT-DzMwfJhnlZiV6b2M7kOzTcElKGx3v-0 — onglets Journal / Stats / Paramètres (journal manuel de Saber, créé dans une session précédente) + 7 onglets « Agent · … » remplis chaque matin par l'agent. Identifiant aussi dans `trade/agent/sheet_id.txt`.
@@ -47,9 +51,9 @@ Critère intraday (études 4 à 6) : ≥ +0,08 R par trade en IS et en OOS, IC p
 ## Pistes restantes
 
 1. ~~Swing trading sur plusieurs jours~~ : testé dans l'étude 7, rien ne bat le buy & hold. Option restante : forward test de RSI 2 achat seulement sur NQ + ES (hors Topstep).
-2. **Candidats issus de la revue (doc 14)** : rebalancement de fin de mois S&P vs T-Note (hors Topstep), adjudications du T-Note 10 ans en intraday sur ZN (Topstep, il faut ZN en 1 minute), suivi de tendance sur 42 futures (hors Topstep).
+2. **Candidats issus de la revue (doc 14)** : fin de mois (étude 9) et suivi de tendance (étude 10) testés et écartés. Reste : adjudications du T-Note 10 ans en intraday sur ZN (compatible Topstep) — il faut ZN en 1 minute sur plusieurs années (Databento, quelques dollars) ; la collecte quotidienne gratuite n'en donne que depuis le 05/10/2026.
 2b. **Données plus fines** (tick par tick, carnet d'ordres) pour des stratégies de microstructure : payantes, complexes, avec une concurrence professionnelle.
-3. **Valoriser le travail** : un vrai projet quant (9 études pré-enregistrées, 16 ans de données, Monte Carlo) à mettre sur le CV pour des candidatures en finance.
+3. **Valoriser le travail** : un vrai projet quant (10 études pré-enregistrées, 16 ans de données, Monte Carlo) à mettre sur le CV pour des candidatures en finance.
 4. **Forward test gratuit** de la noise area V4 sur NQ, en sachant qu'il faut s'attendre à zéro.
 
 ## Règles de travail du projet

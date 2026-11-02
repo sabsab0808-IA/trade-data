@@ -11,7 +11,7 @@ Chaque matin du mardi au samedi à 08:33 (heure de Paris), avant l'ouverture am�
 
 1. télécharge les données (Yahoo Finance : NQ, ES et ZN en 1 minute sur ~29 jours ; Nasdaq-100, S&P 500, SPY et IEF en journalier) ;
 2. rejoue toutes les séances depuis le 02/11/2026 avec les **4 stratégies figées** et les **règles de risque de chaque compte** ;
-3. remplit la Google Sheet « TRADE » de Saber (https://docs.google.com/spreadsheets/d/1onXNuDqVmvT-DzMwfJhnlZiV6b2M7kOzTcElKGx3v-0) : 7 onglets « Agent · … » (tableau de bord, propositions pour la prochaine séance, positions ouvertes, journal, compte Topstep, trades refusés, stratégies). Les onglets Journal, Stats et Paramètres (journal manuel de Saber) ne sont jamais touchés.
+3. remplit la Google Sheet « TRADE » de Saber (https://docs.google.com/spreadsheets/d/1onXNuDqVmvT-DzMwfJhnlZiV6b2M7kOzTcElKGx3v-0) : 7 onglets « Agent · … » (tableau de bord, propositions pour la prochaine séance, positions ouvertes, journal, compte Topstep, trades refusés, stratégies). Les onglets Journal, Stats et Paramètres (journal manuel de Saber) ne sont jamais touchés. Trois onglets statiques complètent la feuille : « Agent · Backtests » (résultats par stratégie et par année), « Agent · Simulations » (doc 19) et « Agent · Études » (bilan des 10 études).
 
 **Mode papier** : aucun ordre n'est envoyé. Les entrées et sorties sont calculées sur les vrais prix, avec les mêmes coûts que dans les études (1 tick de glissement par ordre, 1 $ par micro). L'agent ne modifie jamais les règles.
 
@@ -47,8 +47,8 @@ Contrôle effectué le 02/11/2026 : rejouée sur NQ 2021–2026 (données Databe
 ## Limites
 
 - **Pas de temps réel** : l'agent tourne une fois par jour. Les stratégies intraday (S1) sont données comme des **ordres conditionnels** (niveaux à surveiller), et leur résultat papier est calculé le lendemain matin.
-- Yahoo ne garde que ~30 jours en 1 minute : au-delà du 01/12/2026, il faudra stocker le journal au lieu de tout rejouer (prévu en version 2).
-- Roll de décembre (vers le 10/12) : NQ et ES changent de contrat ; à vérifier si le suivi continue.
+- **Mémoire (version 2, 02/11/2026)** : Yahoo ne garde que ~30 jours en 1 minute. L'agent enregistre donc chaque jour les séances (ouverture, clôture) et les trades intraday dans le projet (`trade/agent/etat/`) et les réutilise le lendemain : le suivi peut durer au-delà de 30 jours.
+- Roll de décembre (vers le 10/12) : NQ et ES changent de contrat chez Yahoo. L'agent compare chaque jour le future et l'indice au comptant et affiche une **alerte** dans le tableau de bord si l'écart dépasse 0,35 % (P&L papier possiblement faussé ce jour-là).
 - **2–3 semaines, c'est 5 à 15 trades par stratégie : statistiquement, ça ne prouve rien.** Il faut 50+ trades par stratégie avant de conclure.
 
 ## Fichiers
