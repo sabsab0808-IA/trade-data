@@ -31,3 +31,19 @@ Le chargeur lit les fichiers `.csv.zst`; pour les autres outils, les mêmes donn
 ## Code
 - `engine.py` : moteur de backtest 1 minute (règles gelées de l'étude n°3 ; constantes MNQ).
 - `load_databento.py` : chargeur générique. `load_nq_databento.py`, `run_study_nq.py` : doc 08 (validation NQ 2010-2020).
+
+---
+
+## Ajouts du 02/11/2026 (branche `ajout-donnees-publiques-2026-11`)
+
+| Dossier | Contenu |
+|---|---|
+| `data_ext/` | Données publiques gratuites : 42 futures journaliers depuis 2000, 21 futures en 1 h, 30 indices/ETF, **univers de 44 ETF** (`yahoo/etf_univers/`), VIX CBOE, positions CFTC 2010–2026, Fama-French, courbe des taux US, articles PDF. Voir `data_ext/README.md`. |
+| `data_live/` | **Collecte automatique chaque soir** (GitHub Actions) : 1 minute de 21 futures Topstep + journalier. Démarrée avec les 29 derniers jours disponibles (depuis le 05/10/2026). Voir `data_live/README.md`. |
+| `agent/` | Agent de trading **papier** (propositions + gestion des comptes Topstep 50K et perso, Google Sheet). Voir `agent/README.md`. |
+| `sim/` | Simulations historiques glissantes de l'agent (toutes les fenêtres 2010–2026). |
+| `results/` | Résultats des études 7 à 10. |
+| `docs/` | Documents du projet (synthèse, pré-enregistrements, résultats, revue, simulations). |
+| `code/` | Code des études 7 à 10 et scripts de téléchargement. |
+
+**Bilan à ce jour (10 études pré-enregistrées)** : aucune stratégie ne passe les critères. Détail dans `docs/12_Synthese_Projet.md`.

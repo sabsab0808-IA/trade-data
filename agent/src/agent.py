@@ -6,7 +6,9 @@ Chaque matin (avant l'ouverture US) :
   3. écrit l'état des comptes, les positions ouvertes, le journal et les propositions pour la prochaine séance.
 
 Rien n'est envoyé à un broker. Les règles ne sont JAMAIS modifiées par l'agent.
-Usage : python3 -I src/agent.py <dossier config> <dossier sortie>
+Usage : python3 -I src/agent.py <dossier config> <dossier sortie> [dossier état]
+  Le dossier état (facultatif) contient la mémoire des runs précédents (seances.csv, candidats_intraday.csv) :
+  elle permet de dépasser la limite de ~30 jours de Yahoo. Les fichiers mis à jour sont réécrits dans <sortie>/etat/.
 """
 import json, sys, time, urllib.parse, urllib.request
 from datetime import date, datetime, timedelta, timezone
@@ -14,6 +16,8 @@ from pathlib import Path
 import numpy as np, pandas as pd
 
 CFG, OUT = Path(sys.argv[1]), Path(sys.argv[2]); OUT.mkdir(parents=True, exist_ok=True)
+ETAT = Path(sys.argv[3]) if len(sys.argv) > 3 else None
+(OUT / "etat").mkdir(exist_ok=True)
 START = date(2026, 11, 2)          # premier jour du suivi papier
 NY = "America/New_York"
 SPEC = {"NQ": dict(sym="NQ=F", micro="MNQ", pv=2.0, tick=0.25, comm=1.0),
@@ -254,8 +258,11 @@ def rsi2(c):
 def s3_rsi2(idx_daily, fut_days, mkt):
     """Signal sur l'indice au comptant (clôture), exécution sur le micro à l'ouverture suivante."""
     sp = SPEC[mkt]; C = idx_daily.close.to_numpy(); dates = list(idx_daily.index)
+    if isinstance(fut_days, dict):
+        fo = fut_days
+    else:
+        fo = {d["date"]: d for d in fut_days}
     sma200 = pd.Series(C).rolling(200).mean().to_numpy(); sma5 = pd.Series(C).rolling(5).mean().to_numpy(); r = rsi2(C)
-    fo = {d["date"]: d for d in fut_days}
     trades, pos, t = [], None, 0
     i0 = next(i for i, d in enumerate(dates) if d >= START - timedelta(days=7))
     for t in range(i0, len(dates)):
@@ -329,7 +336,25 @@ def main():
         for d in days[m]:
             if not finished(d["date"]):
                 d["complete"] = False; d["en_cours"] = True
-    closes = {m: {d["date"]: d["close"] for d in days[m] if not d.get("en_cours")} for m in SPEC}
+    # ---- mémoire : séances (ouverture/clôture) des runs précédents, pour dépasser la fenêtre Yahoo
+    SE = pd.DataFrame([dict(date=d["date"], marche=m, open=d["o"][0], close=d["close"], high=float(np.nanmax(d["h"])), low=float(np.nanmin(d["l"])),
+                            complete=bool(d["complete"])) for m in SPEC for d in days[m] if not d.get("en_cours")])
+    if ETAT is not None and (ETAT / "seances.csv").exists():
+        old = pd.read_csv(ETAT / "seances.csv"); old["date"] = pd.to_datetime(old.date).dt.date
+        key = set(zip(SE.date, SE.marche)); old = old[[(d, m) not in key for d, m in zip(old.date, old.marche)]]
+        SE = pd.concat([old, SE], ignore_index=True)
+    SE = SE.sort_values(["marche", "date"]).reset_index(drop=True); SE.to_csv(OUT / "etat" / "seances.csv", index=False)
+    closes = {m: dict(zip(SE[SE.marche == m].date, SE[SE.marche == m].close)) for m in SPEC}
+    opens = {m: {d: {"o": [o]} for d, o in zip(SE[SE.marche == m].date, SE[SE.marche == m].open)} for m in SPEC}
+    for m in SPEC:  # ouverture de la séance en cours (pour les entrées RSI 2 du jour)
+        for d in days[m]:
+            if d.get("en_cours"):
+                opens[m][d["date"]] = {"o": [d["o"][0]]}
+    # alerte roll : écart entre le future (Yahoo, non ajusté) et l'indice au comptant sur une séance
+    def roll_check(mk, idx):
+        c = pd.Series(closes[mk]); c.index = pd.to_datetime(c.index); ii = idx.close.copy(); ii.index = pd.to_datetime(ii.index)
+        j = pd.concat([c.pct_change(), ii.pct_change()], axis=1, join="inner").dropna(); dev = (j.iloc[:, 0] - j.iloc[:, 1]).abs()
+        return [d.date() for d in dev[dev > 0.0035].index if d.date() >= START]
     last_session = max(d["date"] for d in days["NQ"] if d["complete"])
     nxt = next_session(last_session)
     run_ts = datetime.now(timezone.utc).astimezone(pd.Timestamp.now(tz=NY).tz)
@@ -339,11 +364,25 @@ def main():
 
     # ---- compte Topstep (intraday)
     cands = s1_noise(days["NQ"], SPEC["NQ"]) + s2_monday(days["NQ"], SPEC["NQ"])
+    dnq_all = [d for d in days["NQ"] if not d.get("en_cours")]
+    evaluable = {dnq_all[k]["date"] for k in range(14, len(dnq_all)) if all(dnq_all[k - m]["complete"] for m in range(0, 15))}
+    if ETAT is not None and (ETAT / "candidats_intraday.csv").exists():
+        oc = pd.read_csv(ETAT / "candidats_intraday.csv")
+        if len(oc):
+            oc["date"] = pd.to_datetime(oc.date).dt.date
+            cands += [r for r in oc.to_dict("records") if r["date"] not in evaluable]
+    pd.DataFrame(cands, columns=["date", "heure", "i", "strat", "marche", "sens", "n", "entree", "stop", "sortie", "heure_sortie", "j_out", "raison",
+                                 "risque_usd", "mae_usd", "pnl_usd"]).to_csv(OUT / "etat" / "candidats_intraday.csv", index=False)
     taken, refused, eod, bal, status = topstep_ledger(cands)
 
     # ---- compte perso (multi-jours)
-    t_nq, p_nq, st_nq = s3_rsi2(ndx, days["NQ"], "NQ")
-    t_es, p_es, st_es = s3_rsi2(spx, days["ES"], "ES")
+    t_nq, p_nq, st_nq = s3_rsi2(ndx, opens["NQ"], "NQ")
+    t_es, p_es, st_es = s3_rsi2(spx, opens["ES"], "ES")
+    for mk, idx in (("NQ", ndx), ("ES", spx)):
+        rr = roll_check(mk, idx)
+        if rr:
+            warn.append(f"{mk} : écart future/indice > 0,35 % le {', '.join(f'{d:%d/%m}' for d in rr)} — probable changement de contrat (roll) chez Yahoo ; "
+                        f"le P&L papier des positions tenues ce jour-là peut être faussé.")
     t_me, p_me, me_info = s4_month_end(spy, ief, closes)
     closed_perso, open_perso = [], []
     for tr, mk in ((t_nq, "NQ"), (t_es, "ES")):

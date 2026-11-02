@@ -1,0 +1,27 @@
+name: Collecte quotidienne (Yahoo, gratuit)
+on:
+  schedule:
+    - cron: "17 22 * * 1-5"   # 22:17 UTC, après la clôture US, du lundi au vendredi
+  workflow_dispatch: {}
+permissions:
+  contents: write
+jobs:
+  collecte:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout: |
+            code
+            data_live
+      - name: Collecte
+        run: python3 -I code/collecte_quotidienne.py .
+      - name: Commit
+        run: |
+          git config user.name "collecte-auto"
+          git config user.email "actions@users.noreply.github.com"
+          git add data_live
+          git diff --cached --quiet || git commit -m "Collecte quotidienne $(date -u +%F)"
+          git push
