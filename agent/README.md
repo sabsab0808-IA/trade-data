@@ -11,7 +11,7 @@ Chaque matin du mardi au samedi à 08:33 (heure de Paris), avant l'ouverture am�
 
 1. télécharge les données (Yahoo Finance : NQ, ES et ZN en 1 minute sur ~29 jours ; Nasdaq-100, S&P 500, SPY et IEF en journalier) ;
 2. rejoue toutes les séances depuis le 02/11/2026 avec les **4 stratégies figées** et les **règles de risque de chaque compte** ;
-3. remplit la Google Sheet : tableau de bord, propositions pour la prochaine séance, positions ouvertes, journal, compte Topstep, trades refusés, règles.
+3. remplit la Google Sheet « TRADE » de Saber (https://docs.google.com/spreadsheets/d/1onXNuDqVmvT-DzMwfJhnlZiV6b2M7kOzTcElKGx3v-0) : 7 onglets « Agent · … » (tableau de bord, propositions pour la prochaine séance, positions ouvertes, journal, compte Topstep, trades refusés, stratégies). Les onglets Journal, Stats et Paramètres (journal manuel de Saber) ne sont jamais touchés.
 
 **Mode papier** : aucun ordre n'est envoyé. Les entrées et sorties sont calculées sur les vrais prix, avec les mêmes coûts que dans les études (1 tick de glissement par ordre, 1 $ par micro). L'agent ne modifie jamais les règles.
 
@@ -40,9 +40,9 @@ Contrôle effectué le 02/11/2026 : rejouée sur NQ 2021–2026 (données Databe
 
 ## Comment s'en servir pendant les 2–3 semaines de papier
 
-1. Avant 15:30 (heure de Paris), ouvre l'onglet **Propositions** : l'action à faire pour chaque stratégie (ACHAT, VENTE, Conserver, Conditionnel, Rien).
+1. Avant 15:30 (heure de Paris), ouvre l'onglet **Agent · Propositions** : l'action à faire pour chaque stratégie (ACHAT, VENTE, Conserver, Conditionnel, Rien).
 2. Si tu veux t'entraîner, passe les ordres en **démo** et compare avec le journal de l'agent le lendemain.
-3. Le **Tableau de bord** donne le solde, la marge avant la perte max et le reste à faire pour l'objectif.
+3. L'onglet **Agent · Tableau de bord** donne le solde, la marge avant la perte max et le reste à faire pour l'objectif.
 
 ## Limites
 

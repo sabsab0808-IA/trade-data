@@ -380,7 +380,7 @@ def main():
     if len(dnq) >= 14 and all(d["complete"] for d in dnq[-14:]):
         sig = np.mean([np.abs(dnq[-m]["c"] / dnq[-m]["o"][0] - 1) for m in range(1, 15)], axis=0)
         pc = dnq[-1]["close"]
-        lv = "; ".join(f"{hhmm(t + 1)} ±{1.5 * sig[t] * 100:.2f} % (stop {sig[t] * pc:.0f} pts, {int(TOP['risque_max_trade'] // (sig[t] * pc * 2))} MNQ)"
+        lv = " ; ".join(f"{hhmm(t + 1)} ±{fmt(1.5 * sig[t] * 100)} % (stop {sig[t] * pc:.0f} pts, {int(TOP['risque_max_trade'] // (sig[t] * pc * 2))} MNQ)"
                        for t in (29, 59, 89, 149, 209, 269, 329))
         props.append(dict(compte="Topstep 50K", strategie="S1 · Noise area V4 (NQ)", marche="MNQ", action="Conditionnel",
                           detail=f"Toutes les 30 min dès 10:00 ET (16:00 Paris) : ACHAT si la clôture de la bougie 1 min dépasse max(ouverture, {fmt(pc)}) × (1 + x) ; "
@@ -485,13 +485,13 @@ def main():
          ["Mode", "PAPIER (aucun ordre réel). Suivi depuis le 02/11/2026."],
          ["", ""],
          ["COMPTE TOPSTEP 50K (papier)", status],
-         ["Solde", f"{bal:,.2f} $"], ["P&L total", f"{top_pnl:+,.2f} $"], ["Objectif (consistance 55 % incluse)", f"{target:,.2f} $"],
-         ["Reste à faire", f"{max(0, target - top_pnl):,.2f} $"], ["Plancher MLL (perte max)", f"{floor:,.2f} $"],
-         ["Marge avant le plancher", f"{bal - floor:,.2f} $"], ["Trades pris / refusés", f"{len(taken)} / {len(refused)}"],
+         ["Solde", f"{fmt(bal)} $"], ["P&L total", f"{"" if top_pnl >= 0 else "−"}{fmt(abs(top_pnl))} $"], ["Objectif (consistance 55 % incluse)", f"{fmt(target)} $"],
+         ["Reste à faire", f"{fmt(max(0, target - top_pnl))} $"], ["Plancher MLL (perte max)", f"{fmt(floor)} $"],
+         ["Marge avant le plancher", f"{fmt(bal - floor)} $"], ["Trades pris / refusés", f"{len(taken)} / {len(refused)}"],
          ["", ""],
          ["COMPTE PERSO (papier, 50 000 $)", ""],
-         ["Valeur (réalisé + latent)", f"{perso_eq:,.2f} $"], ["P&L réalisé", f"{perso_real:+,.2f} $"], ["P&L latent", f"{perso_lat:+,.2f} $"],
-         ["Positions ouvertes", str(len(open_perso))], ["Risque ouvert (1 ATR20)", f"{risk_open:,.0f} $ ({100 * risk_open / PERSO['capital']:.1f} % ; max 6 %)"],
+         ["Valeur (réalisé + latent)", f"{fmt(perso_eq)} $"], ["P&L réalisé", f"{"" if perso_real >= 0 else "−"}{fmt(abs(perso_real))} $"], ["P&L latent", f"{"" if perso_lat >= 0 else "−"}{fmt(abs(perso_lat))} $"],
+         ["Positions ouvertes", str(len(open_perso))], ["Risque ouvert (1 ATR20)", f"{fmt(risk_open, 0)} $ ({fmt(100 * risk_open / PERSO['capital'], 1)} % ; max 6 %)"],
          ["", ""], ["STATUT DES STRATÉGIES", ""]] + [[k, v] for k, v in STATUTS.items()] + \
         [["", ""], ["Rappel", "Aucune stratégie n'a d'edge prouvé. Il faut 50+ trades par stratégie avant de conclure. Ne pas passer en réel sur la base de 2–3 semaines."]] + \
         [["Alerte", w] for w in warn]
@@ -507,10 +507,24 @@ def main():
               ["Règles du compte", "Topstep 50K", "Perte max 2 000 $ en temps réel (plancher qui suit le solde de fin de journée, bloqué à 50 000 $) ; objectif 3 000 $ ; meilleur jour ≤ 55 % de l'objectif ; "
                "2 trades max par jour ; perte journalière max 1 000 $ ; ≤ 250 $ de risque par trade (600 $ pour le lundi) ; risque ouvert total ≤ 850 $.", ""],
               ["Règles du compte", "Perso", "Capital papier 50 000 $ ; 1 micro par signal (ZN : contrat standard) ; risque ouvert total ≤ 6 % du capital (1 R = ATR20 journalier).", ""]]
+    NOMS = dict(seance="Séance", compte="Compte", strategie="Stratégie", marche="Marché", action="Action", detail="Détail", risque="Risque",
+                statut="Statut", depuis="Depuis", sens="Sens", contrats="Contrats", entree="Entrée", cours="Cours", latent_usd="Latent ($)",
+                sortie_prevue="Sortie prévue", info="Info", date_entree="Entrée le", stop="Stop", date_sortie="Sortie le", sortie="Sortie",
+                raison="Raison", pnl_usd="P&L net ($)", r="R", date="Date", pnl_jour="P&L du jour ($)", solde="Solde ($)",
+                plancher_mll="Plancher MLL ($)", objectif="Objectif ($)", meilleur_jour="Meilleur jour ($)", trades="Trades",
+                pnl_si_pris="P&L si pris ($)", refus="Motif du refus")
     def tab(df):
-        return [list(df.columns)] + [["" if (isinstance(x, float) and np.isnan(x)) else (x if isinstance(x, (int, float, str)) else str(x)) for x in r] for r in df.itertuples(index=False)]
-    payload = {"Tableau de bord": [["Indicateur", "Valeur"]] + D, "Propositions": tab(P), "Positions": tab(pd.read_csv(OUT / "positions_ouvertes.csv")),
-               "Journal": tab(J), "Compte Topstep": tab(pd.read_csv(OUT / "compte_topstep.csv")), "Refus": tab(pd.read_csv(OUT / "refus.csv")), "Stratégies": REGLES}
+        return [[NOMS.get(c, c) for c in df.columns]] + [["" if (isinstance(x, float) and np.isnan(x)) else (x if isinstance(x, (int, float, str)) else str(x)) for x in r] for r in df.itertuples(index=False)]
+    # onglets préfixés « Agent · » : la feuille contient déjà Journal / Stats / Paramètres (journal manuel de Saber), à ne jamais toucher
+    payload = {"Agent · Tableau de bord": [["Indicateur", "Valeur"]] + D, "Agent · Propositions": tab(P),
+               "Agent · Positions": tab(pd.read_csv(OUT / "positions_ouvertes.csv").fillna("")), "Agent · Journal": tab(J),
+               "Agent · Compte Topstep": tab(pd.read_csv(OUT / "compte_topstep.csv")), "Agent · Refus": tab(pd.read_csv(OUT / "refus.csv")),
+               "Agent · Stratégies": REGLES}
+    for rows in payload.values():
+        for r in rows:
+            for i, x in enumerate(r):
+                if isinstance(x, str) and x[:1] in "+=":
+                    r[i] = "\u2009" + x
     (OUT / "sheet_payload.json").write_text(json.dumps(payload, ensure_ascii=False, default=str))
     print("\n".join(f"{a} : {b}" for a, b in D))
     print("\nPROPOSITIONS", nxt); print(P.to_string(index=False))
