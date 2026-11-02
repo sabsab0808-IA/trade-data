@@ -42,7 +42,7 @@ Le chargeur lit les fichiers `.csv.zst`; pour les autres outils, les mêmes donn
 | `data_live/` | **Collecte automatique chaque soir** (GitHub Actions) : 1 minute de 21 futures Topstep + journalier. Démarrée avec les 29 derniers jours disponibles (depuis le 05/10/2026). Voir `data_live/README.md`. |
 | `agent/` | Agent de trading **papier** (propositions + gestion des comptes Topstep 50K et perso, Google Sheet). Voir `agent/README.md`. |
 | `sim/` | Simulations historiques glissantes de l'agent (toutes les fenêtres 2010–2026). |
-| `results/` | Résultats des études 7 à 10. |
+| `results/` | Résultats des études 7, 8, 9 et 15 (les études 10 à 14 sont dans le projet claude.ai, doc 18). |
 | `docs/` | Documents du projet (synthèse, pré-enregistrements, résultats, revue, simulations). |
 | `code/` | Code des études 7 à 10 et scripts de téléchargement. |
 

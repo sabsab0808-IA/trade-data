@@ -1,5 +1,5 @@
-"""Étude n°10 — suivi de tendance diversifié (TSMOM 12 mois) sur 29 ETF (doc 18).
-Usage : python3 -I code/study10.py <dossier etf_univers> <sortie>"""
+"""Étude n°15 (ex-étude 10) — suivi de tendance diversifié (TSMOM 12 mois) sur 29 ETF (doc 20).
+Usage : python3 -I code/study15_tendance_etf.py <dossier etf_univers> <sortie>"""
 import sys
 from pathlib import Path
 import numpy as np, pandas as pd

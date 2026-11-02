@@ -1,9 +1,11 @@
 ---
-title: Étude n°10 — Pré-enregistrement
+title: Étude n°15 — Pré-enregistrement
 subtitle: Suivi de tendance diversifié sur 29 ETF multi-actifs — écrit AVANT tout calcul
-num: 18
+num: 20
 date: 2026-11-02
 ---
+
+> **Renumérotée le 02/11/2026** : publiée d'abord comme « étude 10 / doc 18 », en même temps qu'une autre série « études 10 à 14 » (doc 18). Pour éviter le doublon, elle devient l'**étude 15 / doc 20**. Le contenu ci-dessous est inchangé depuis sa publication avant calcul.
 
 ## Pourquoi cette étude
 
